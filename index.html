@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#174c3c">
+<title>My Ramadan Tracker</title>
+<style>
+:root{--green:#174c3c;--green2:#267653;--mint:#e8f2ec;--bg:#f5f7f5;--ink:#1c2923;--muted:#68766e;--line:#dce5df;--white:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:var(--green);color:white;padding:25px 18px 22px}
+.wrap{max-width:760px;margin:auto}
+.kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.8}
+h1{font-size:26px;margin:5px 0 4px}
+header p{margin:0;color:#dcebe2;font-size:14px}
+main{padding:16px 14px 40px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:16px;margin:0 0 14px;box-shadow:0 2px 8px #183d2a0a}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h2{font-size:17px;margin:0 0 12px}
+.small{font-size:12px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stat{background:var(--mint);border-radius:12px;padding:11px 8px;text-align:center}
+.stat strong{display:block;font-size:22px;color:var(--green)}
+.stat span{font-size:11px;color:var(--muted)}
+.progress{height:10px;background:#e8eee9;border-radius:20px;overflow:hidden;margin:10px 0 4px}
+.progress>div{height:100%;width:0;background:var(--green2);border-radius:20px;transition:width .2s}
+.daynav{display:flex;gap:8px;align-items:center}
+button,select{font:inherit}
+button{border:1px solid var(--line);background:white;color:var(--green);border-radius:10px;padding:9px 12px;font-weight:650;cursor:pointer}
+button.primary{background:var(--green);border-color:var(--green);color:white}
+button:active{transform:scale(.98)}
+select{border:1px solid var(--line);border-radius:10px;padding:9px;background:white;color:var(--ink);max-width:100%}
+.task{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #edf1ee}
+.task:last-child{border-bottom:0;padding-bottom:0}
+.task input{width:23px;height:23px;accent-color:var(--green);flex:none}
+.task label{flex:1;cursor:pointer}
+.task strong{display:block;font-size:14px}
+.task small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.pill{font-size:11px;color:var(--green);background:var(--mint);padding:5px 8px;border-radius:20px;white-space:nowrap}
+.history{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.day{padding:9px 2px;text-align:center;border:1px solid var(--line);border-radius:10px;background:white;font-size:12px}
+.day strong{display:block;font-size:14px}
+.day.done{background:var(--mint);border-color:#a9c9b5;color:var(--green)}
+.day.partial{background:#fff8e7;border-color:#ecd69b}
+.day.selected{outline:2px solid var(--green);outline-offset:1px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:5px 18px 25px}
+@media(min-width:600px){main{padding-top:22px}.history{grid-template-columns:repeat(10,1fr)}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="kicker">30-day worship plan</div>
+  <h1>My Ramadan Tracker 🌙</h1>
+  <p>10 Juz • 10,000 Dhikr • One day at a time</p>
+</div></header>
+<main class="wrap">
+  <section class="card">
+    <div class="row"><div><div class="small">SELECTED DAY</div><h2 id="dayHeading" style="margin:2px 0 0">Day 1</h2></div>
+      <div class="daynav"><button id="prev" aria-label="Previous day">‹</button><select id="daySelect" aria-label="Choose Ramadan day"></select><button id="next" aria-label="Next day">›</button></div>
+    </div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="row"><span class="small" id="progressText">0 of 10 tasks completed</span><strong id="percent">0%</strong></div>
+    <div class="stats">
+      <div class="stat"><strong id="juzCount">0/10</strong><span>Juz completed</span></div>
+      <div class="stat"><strong id="dhikrCount">0/10k</strong><span>Dhikr completed</span></div>
+      <div class="stat"><strong id="dayStatus">Not yet</strong><span>Daily status</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Quran reading — 5 hours total</h2>
+    <div class="small">Start your first session after Fajr. Each Juz is planned for 30 minutes.</div>
+    <div id="quranTasks"></div>
+  </section>
+
+  <section class="card">
+    <h2>Dhikr — 10,000 total</h2>
+    <div class="small">Tick each 2,000-count session when completed. Use the phrases you choose.</div>
+    <div id="dhikrTasks"></div>
+  </section>
+
+  <section class="card">
+    <div class="row"><h2 style="margin:0">30-day history</h2><span class="small">Tap a day to view it</span></div>
+    <div class="progress"><div id="monthBar"></div></div>
+    <div class="small" id="monthText" style="margin-bottom:12px">0 of 30 days fully completed</div>
+    <div class="history" id="history"></div>
+  </section>
+
+  <section class="card">
+    <h2>Backup & settings</h2>
+    <p class="small">Your ticks are saved on this device in this browser. They stay after closing the app, but may be lost if you clear browser data or change devices.</p>
+    <div class="actions">
+      <button class="primary" id="export">Download my progress</button>
+      <button id="resetDay">Clear selected day</button>
+      <button id="resetAll">Reset all 30 days</button>
+    </div>
+  </section>
+  <footer>May Allah accept your Quran, dhikr, fasting and prayers. Ameen. 🤲</footer>
+</main>
+<script>
+const KEY='myRamadanTracker_v1';
+const quran=[
+  ['After Fajr','Juz 1–2',2],['After Dhuhr','Juz 3–4',2],
+  ['After Asr','Juz 5–6',2],['After Maghrib','Juz 7–8',2],
+  ['After Isha / Taraweeh','Juz 9–10',2]
+];
+const dhikr=['After Fajr','After Dhuhr','After Asr','After Maghrib','After Isha'];
+let data={};
+try{data=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){data={}}
+let selected=1;
+const $=id=>document.getElementById(id);
+function dayData(n){if(!data[n])data[n]={q:[false,false,false,false,false],d:[false,false,false,false,false]};return data[n]}
+function save(){localStorage.setItem(KEY,JSON.stringify(data))}
+function count(arr){return arr.filter(Boolean).length}
+function completed(n){let x=dayData(n);return count(x.q)===5&&count(x.d)===5}
+function render(){
+  let x=dayData(selected), tasks=count(x.q)+count(x.d), pct=tasks*10;
+  $('dayHeading').textContent='Day '+selected;
+  $('daySelect').value=selected;
+  $('progressText').textContent=tasks+' of 10 tasks completed';
+  $('percent').textContent=pct+'%';
+  $('bar').style.width=pct+'%';
+  $('juzCount').textContent=(count(x.q)*2)+'/10';
+  $('dhikrCount').textContent=(count(x.d)*2000).toLocaleString()+'/10k';
+  $('dayStatus').textContent=completed(selected)?'Complete':tasks?'In progress':'Not yet';
+  $('quranTasks').innerHTML=quran.map((a,i)=>taskHTML('q',i,a[0],a[1],a[2]+' Juz • 60 minutes',x.q[i])).join('');
+  $('dhikrTasks').innerHTML=dhikr.map((a,i)=>taskHTML('d',i,a,'2,000 Dhikr','2,000 repetitions',x.d[i])).join('');
+  document.querySelectorAll('[data-task]').forEach(el=>el.addEventListener('change',()=>{
+    let [type,index]=el.dataset.task.split('-');dayData(selected)[type][+index]=el.checked;save();render();
+  }));
+  let full=0;
+  $('history').innerHTML=Array.from({length:30},(_,i)=>{
+    let n=i+1,dd=dayData(n),c=count(dd.q)+count(dd.d);if(c===10)full++;
+    let cls=c===10?'done':c>0?'partial':'';
+    return `<button class="day ${cls} ${n===selected?'selected':''}" data-day="${n}"><strong>${n}</strong>${c}/10</button>`;
+  }).join('');
+  document.querySelectorAll('[data-day]').forEach(el=>el.addEventListener('click',()=>{selected=+el.dataset.day;render();window.scrollTo({top:0,behavior:'smooth'});}));
+  $('monthBar').style.width=(full/30*100)+'%';
+  $('monthText').textContent=full+' of 30 days fully completed';
+}
+function taskHTML(type,i,title,sub,detail,checked){
+ return `<div class="task"><input type="checkbox" id="${type}${i}" data-task="${type}-${i}" ${checked?'checked':''}><label for="${type}${i}"><strong>${title}</strong><small>${sub} · ${detail}</small></label><span class="pill">${checked?'Done':'Pending'}</span></div>`;
+}
+for(let i=1;i<=30;i++){let o=document.createElement('option');o.value=i;o.textContent='Day '+i;$('daySelect').appendChild(o)}
+$('daySelect').addEventListener('change',e=>{selected=+e.target.value;render()});
+$('prev').onclick=()=>{selected=Math.max(1,selected-1);render()};
+$('next').onclick=()=>{selected=Math.min(30,selected+1);render()};
+$('resetDay').onclick=()=>{if(confirm('Clear all ticks for Day '+selected+'?')){delete data[selected];save();render()}};
+$('resetAll').onclick=()=>{if(confirm('Erase all saved ticks for all 30 days? This cannot be undone.')){data={};save();render()}};
+$('export').onclick=()=>{
+ let rows=['Day,Quran sessions completed,Juz completed,Dhikr sessions completed,Dhikr count,Day complete'];
+ for(let n=1;n<=30;n++){let x=dayData(n);rows.push([n,count(x.q),count(x.q)*2,count(x.d),count(x.d)*2000,completed(n)?'Yes':'No'].join(','))}
+ let blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8'});
+ let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='my-ramadan-progress.csv';a.click();URL.revokeObjectURL(a.href);
+};
+render();
+</script>
+</body></html>
